@@ -75,7 +75,7 @@
 		var bounds = L.latLngBounds(L.latLng(config.south,config.west), L.latLng(config.north,config.east));
         var map = L.mapbox.map('map', config.baseMap,{ 
             center: config.mapFocus,
-            zoom: 13, minZoom : 13, maxBounds : bounds, zoomControl :false });
+            zoom: 13, minZoom : 13, maxzoom: 17, maxBounds : bounds, zoomControl :false });
         
         L.control.zoom({position : 'bottomleft'}).addTo(map);
 		    
@@ -314,19 +314,22 @@
             at: "center center",
             of: "#map"
         },
-          buttons: {
-            "Save Input": function(){
+          buttons: [{
+			  text: "Save Input",
+			  click : function(){
 				setData();
-			
-			},
-            Cancel: function() {
+			  },
+			  id: "dialogSaveInput"
+		  },
+			  {text: "Cancel",
+			  click: function() {
                 if(markerDraw){
                     refreshLayer();
                     markerDrawer.enable();
                 }
                 dialog.dialog("close");
             }
-          },
+          }],
           close: function() {
             if(markerDraw){
                     refreshLayer();
@@ -343,7 +346,12 @@
                   _title += " route";
               }
               $( "#dialog" ).dialog( "option", "title",_title);
-              
+			  $( "#dialog" ).keydown(function(e) {
+					  if (e.keyCode == $.ui.keyCode.ENTER) {
+						$("#dialogSaveInput").trigger("click");
+					  }    
+					});
+			  
           }
     });
         
@@ -398,7 +406,14 @@
 		$("#cancel").show();
 		markerDrawer.enable();
 		markerDraw = true;
-	}	
+	}
+		
+	function stopDrawingPoints(){
+		$("#add-point").removeClass('icon-click');
+		$("#cancel").hide();
+		markerDrawer.disable();
+		markerDraw = false;
+	}
 	
     function setData() {
       var enteredDescription = "'"+description.value+"'";
@@ -438,6 +453,8 @@
                   newData.properties.zipcode = zip;
                 submittedData.addData(newData);
             });
+			stopDrawingPoints();
+			
         };
 
         refreshLayer();
