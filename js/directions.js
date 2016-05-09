@@ -1,3 +1,5 @@
+var lastClick = 0;
+
 function startNewLine(rNum) {
 	$("#map").addClass("pointing");
     var polyline = new line(rNum);
@@ -34,6 +36,12 @@ function stopRouteDraw(){
  */
 function addMarker(evt) {
 
+	//From http://stackoverflow.com/a/28610565/4047679
+	if (lastClick >= (Date.now() - 20))
+    	return;
+	
+	lastClick = Date.now();
+	
 	
     if (currentLine === null) {
 	}
@@ -44,9 +52,11 @@ function addMarker(evt) {
 		marker.on('dragend', function() {
 			drawRoute(currentLine);
 		});
-		
+		drawnRoute.addLayer(marker);
+		currentLine.waypoints.push(marker);
+		drawRoute(currentLine);
         //Change message of the tooltip, and enable finishing route
-        if(currentLine.waypoints.length > 2){
+        if(currentLine.waypoints.length >= 2){
 			routeDrawTooltip.updateContent({text: 'Double-click on a point to finish drawing' });
 			map.on("dblclick", endLine);
 //			marker.on('click', endLine);
@@ -56,9 +66,7 @@ function addMarker(evt) {
 			$("#save").show();
 			$("#save").css({'display':'inline-block'});
 		}
-		drawnRoute.addLayer(marker);
-		currentLine.waypoints.push(marker);
-		drawRoute(currentLine);
+
 	}
 }
 
