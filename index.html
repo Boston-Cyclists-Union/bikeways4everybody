@@ -2,7 +2,7 @@
 <!--Based on https://github.com/mjfoster83/web-map-workshop/blob/master/7_advancedMapping_CartoDB/index-completed.html-->
 <html>
   <head>
-    <meta charset=utf-8 />
+    <meta charset=utf-8 name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Bikeways for Everybody!</title>
 <!--      Mapbox-->
     <script src="https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.js"></script>
@@ -19,6 +19,11 @@
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 
+<!--      Geolocate Button-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/leaflet.locatecontrol/0.52.0/L.Control.Locate.mapbox.min.css">
+    <script src="https://cdn.jsdelivr.net/leaflet.locatecontrol/0.52.0/L.Control.Locate.min.js"></script>
+<!--      /Geolocate Button-->
+	  
 <!--      QGIS Webmap-->
         <link rel="stylesheet" href="css/label.css" />
         <script src="js/label.js"></script>
@@ -75,8 +80,8 @@
 		var bounds = L.latLngBounds(L.latLng(config.south,config.west), L.latLng(config.north,config.east));
         var map = L.mapbox.map('map', config.baseMap,{ 
             center: config.mapFocus,
-            zoom: 13, minZoom : 13, maxBounds : bounds, zoomControl :false });
-        
+            zoom: 13, minZoom : 13, maxzoom: 17, maxBounds : bounds, zoomControl :false });
+        map.touchZoom.enable();
         L.control.zoom({position : 'bottomleft'}).addTo(map);
 		    
             //Empty to store markers after they are submitted
@@ -98,16 +103,16 @@
 		leftBar.onAdd = function(map){
 			var div =L.DomUtil.create('div', '');
 			div.id = 'leftBar';
-			div.innerHTML = '<div id="add-route" class="circle type1 icon-hover tooltip" title="Draw routes on the map where you want improved infrastructure">'
+			div.innerHTML = '<span style="font-size:x-large"><div id="add-route" class="circle type1 icon-hover tooltip" title="Draw routes on the map where you want improved infrastructure">'
 				+'<i class="fa fa-pencil fa-3x fa-inverse"></i>'
-				+'</div>'
+				+'</div></span>'
 				+'  <div id="add-point" class="circle type1 icon-hover tooltip" title="Add points to the map where you want improved infrastructure">'
 				+'<i class="fa fa-map-marker fa-inverse fa-3x"></i>'
 				+'</div><br>'
-				+'<div id="about" class="circle type1 icon-hover tooltip" title="Learn more">'
+				+'&emsp;<div id="about" class="circle type1 icon-hover tooltip" title="Learn more">'
 				+'<i class="fa fa-info fa-3x fa-inverse"></i>'
 				+'</div>	<br>'
-				+'<div id="cancel" class="circle type1 icon-hover tooltip" title="Cancel drawing" style="inline-block">'
+				+'&emsp;<div id="cancel" class="circle type1 icon-hover tooltip" title="Cancel drawing" style="inline-block">'
 				+'<i class="fa fa-times fa-3x fa-inverse"></i>'
 				+'</div>'
 				+' <div id="save" class="circle type1 icon-hover tooltip" title="Save Route" style="inline-block">'
@@ -124,7 +129,7 @@
 			"tilejson": "2.0.1",
 			"tiles":['http://c.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png'], 
             "attribution": '&copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
-            "maxzoom": 19,
+            "maxzoom": 17,
         	"minzoom": 13       
         };
         
@@ -134,7 +139,7 @@
 		//See for explanation of zindex level http://stackoverflow.com/q/35092858/4047679 
 		labelLayer.setZIndex(5);
 		
-		
+
 		
             //Empty to store drawn routes after they are submitted
         var submittedRoutes = new L.geoJson(false, {
@@ -199,10 +204,12 @@
         });
 
 
+		
+		
 		/*Button that triggers the initial walkthrough again*/
 		$("#about").on("click", function(event){
 			event.stopPropagation();
-		     $.prompt(tourStates);
+		     $.prompt(tourStates,{zIndex: 1200});
 		});
 		
 		$("#cancel").on("click", function(event){
@@ -271,27 +278,6 @@
 			id: "globalAccept"
 		  }],
 		  close: function() {
-				var checkedValues = dialogGlobalChecker(username.value, zipcode.value, email.value);
-				if (checkedValues.valid){
-					zip = "'"+zipcode.value+"'";
-					enteredUsername = "'"+username.value+"'";
-
-					dialogGlobal.dialog("close");
-					validInput = true;
-					if($(this).data('clicked')=='add-route'){
-						drawingRoute();
-					}
-					else if($(this).data('clicked')=='add-point'){
-						drawingPoints();
-					}
-				}
-				else{
-					validInput = false;
-					var index;
-					for(index = 0; index < checkedValues.error.length; ++index){
-						alert(checkedValues.error[index]);
-					}
-				}
 		  },
 			//Hack to avoid "ENTER" leading to a new page...
 			open: function(){
@@ -314,19 +300,22 @@
             at: "center center",
             of: "#map"
         },
-          buttons: {
-            "Save Input": function(){
+          buttons: [{
+			  text: "Save Input",
+			  click : function(){
 				setData();
-			
-			},
-            Cancel: function() {
+			  },
+			  id: "dialogSaveInput"
+		  },
+			  {text: "Cancel",
+			  click: function() {
                 if(markerDraw){
                     refreshLayer();
                     markerDrawer.enable();
                 }
                 dialog.dialog("close");
             }
-          },
+          }],
           close: function() {
             if(markerDraw){
                     refreshLayer();
@@ -343,7 +332,12 @@
                   _title += " route";
               }
               $( "#dialog" ).dialog( "option", "title",_title);
-              
+			  $( "#dialog" ).keydown(function(e) {
+					  if (e.keyCode == $.ui.keyCode.ENTER) {
+						$("#dialogSaveInput").trigger("click");
+					  }    
+					});
+			  
           }
     });
         
@@ -371,7 +365,9 @@
 			}
             return {valid: valid, error: error};        
     }
-        
+     
+		
+	$(".ui-front").css('z-index','1005');
 		
 	//Functions to initiate drawing
 	function drawingRoute(){
@@ -398,7 +394,14 @@
 		$("#cancel").show();
 		markerDrawer.enable();
 		markerDraw = true;
-	}	
+	}
+		
+	function stopDrawingPoints(){
+		$("#add-point").removeClass('icon-click');
+		$("#cancel").hide();
+		markerDrawer.disable();
+		markerDraw = false;
+	}
 	
     function setData() {
       var enteredDescription = "'"+description.value+"'";
@@ -438,6 +441,8 @@
                   newData.properties.zipcode = zip;
                 submittedData.addData(newData);
             });
+			stopDrawingPoints();
+			
         };
 
         refreshLayer();
@@ -544,6 +549,15 @@
         
         stackLayers();
 
+		/*Geolocator, activate only on mobile
+		http://stackoverflow.com/a/26577897/4047679*/
+		if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
+			L.control.locate({
+				position: 'topright',
+				icon: 'fa fa-crosshairs',
+				locateOptions: {maxZoom: 17}
+			}).addTo(map);
+		}
         
     function refreshLayer() {
              
