@@ -1,8 +1,11 @@
 # Bikeways for Everybody
 Crowd-sourcing lines on a map to solicit public input on ideal locations for fully protected bike routes as part of the [Boston Cyclists' Union's Bikeways for Everybody initiative](http://bostoncyclistsunion.org/bikeways-for-everybody/). See the live site [here](https://boston-cyclists-union.github.io/bikeways4everybody/)
 
-# How to Fork
+# How to Fork  
 
+------------
+**PLEASE FORK FROM [radumas/bikeways4everybody](https://github.com/radumas/bikeways4everybody) INSTEAD**
+------------
 ## Set Up Accounts and Fork Repository
 
 1. Get a [github](https://github.com/join), a [cartodb](https://cartodb.com/signup), and a [mapbox](https://www.mapbox.com/studio/signup/) account
