@@ -3,6 +3,8 @@
 <html>
   <head>
     <meta charset=utf-8 name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<!-- http://stackoverflow.com/a/3449338/4047679 -->
+	  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Bikeways for Everybody!</title>
 <!--      Mapbox-->
     <script src="https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.js"></script>
@@ -50,7 +52,6 @@
 			<li><label for="email">Please Enter Your Email (optional)</label></li>
             <li><input type="email" name="email" id="email" title="Please enter a valid email so we can get in touch with you (optional)" placeholder="yourname@example.com" class="text ui-widget-content ui-corner-all"></li>
           </ul>
-          <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
         </fieldset>
       </form>
     </div>
@@ -60,7 +61,7 @@
         <fieldset style="border: none;">
           <ul style="list-style-type: none; padding-left: 0px">
             <li><label for="description">About this</label></li>
-            <li><input type="text" name="description" id="description" placeholder="Description for this" class="text ui-widget-content ui-corner-all"></li>
+			  <li><textarea type="text" name="description" id="description" rows="3" placeholder="Description for this" class="text ui-widget-content ui-corner-all"></textarea></li>
           </ul>
           <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
         </fieldset>
@@ -286,8 +287,33 @@
 					$("#globalAccept").trigger("click");
 				  }    
 				});
+				
 			}
 		});
+		
+		$("#globalAccept").on("touchstart", function() {
+				var checkedValues = dialogGlobalChecker(username.value, zipcode.value);
+				if (checkedValues.valid){
+					zip = "'"+zipcode.value+"'";
+					enteredUsername = "'"+username.value+"'";
+
+					dialogGlobal.dialog("close");
+					validInput = true;
+					if($(this).data('clicked')=='add-route'){
+						drawingRoute();
+					}
+					else if($(this).data('clicked')=='add-point'){
+						drawingPoints();
+					} 
+				}
+				else{
+					validInput = false;
+					var index;
+					for(index = 0; index < checkedValues.error.length; ++index){
+						alert(checkedValues.error[index]);
+					}
+				}
+			});
 		
         /* dialog that appears after finishing a drawing */
       dialog = $( "#dialog" ).dialog({
@@ -337,7 +363,7 @@
 						$("#dialogSaveInput").trigger("click");
 					  }    
 					});
-			  
+			
           }
     });
         
@@ -545,8 +571,11 @@
         feature_group.addLayer(json_bikefacilitiesJSON);
         
        L.control.layers({},{'<b>Bike Facilities</b><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="img/legend/bikefacilities_Offstreet.png" /> Offstreet<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="img/legend/bikefacilities_Cycletrack.png" /> Cycletrack<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="img/legend/bikefacilities_Buffered.png" /> Buffered<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="img/legend/bikefacilities_Bikelane.png" /> Bikelane<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="img/legend/bikefacilities_Sharrow.png" /> Sharrow<br />': json_bikefacilitiesJSON},{collapsed:false}).addTo(map);
-        L.control.scale({options: {position: 'bottomleft', maxWidth: 100, metric: true, imperial: false, updateWhenIdle: false}}).addTo(map);
         
+		L.control.scale({options: {position: 'bottomleft', maxWidth: 100, metric: true, imperial: false, updateWhenIdle: false}}).addTo(map);
+        $(".leaflet-left .leaflet-control-scale").css({"display": "inline-block","float": "none"});
+		//http://stackoverflow.com/a/37173967/4047679
+		
         stackLayers();
 
 		/*Geolocator, activate only on mobile
@@ -627,6 +656,34 @@
                 submit:tourSubmitFunc
             }
          ];
+        
+		if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
+          tourStates = [
+              {
+                title:"Click on <span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-pencil fa-inverse fa-stack-1x'></i></span> to Draw a Route",
+                html:"<div class = 'img-container'><img src='img/draw_route.gif'></div><br>Click to add points to form a route. Double click on the final point to end that route, and then write a description.",
+                buttons:{'I already know':0,'Tell me more':1},
+                focus:1,
+                submit:tourSubmitFunc
+            },
+            {
+                title:"Click on <span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-map-marker fa-inverse fa-stack-1x'></i></span> to Place a Marker",
+                html:"<div class = 'img-container'><img src='img/add_marker.gif'></div><br>Tell us about dangerous intersections, potholes, etc. When you click 'Save Input' your marker and description are sent to our database.",
+                buttons:{'Go back':-1,'I\'m done':0,'Tell me more!':1},
+                focus:2,
+                submit:tourSubmitFunc
+            },
+              {
+               title: "More Info",
+               html: config.walkthroughWelcome,
+               buttons:{'Go back':-1,'I\'m ready!':0},
+               focus: 1,
+               submit: tourSubmitFunc
+	       }
+          ]   
+        }
+
+        
         $.prompt(tourStates, {zIndex: 1200});
             
     </script>
