@@ -92,6 +92,17 @@ BEGIN
         RETURN NEXT '--Error in Point Aggregation--\n%'||text_error;
     END;        
     
+    BEGIN 
+        TRUNCATE bikeways_public_disaggregate;
+        INSERT INTO bikeways_public_disaggregate(cartodb_id, user_id, notes, the_geom, the_geom_webmercator, zipcode, insert_time ) 
+        (SELECT cartodb_id, md5(upper(name)||zipcode||'bikeways') as user_id, notes, the_geom, the_geom_webmercator, zipcode, insert_time 
+         FROM bikeways 
+        );
+    EXCEPTION WHEN OTHERS THEN
+        GET STACKED DIAGNOSTICS text_error = PG_CONTEXT;
+        RETURN NEXT '--Error in Copying Public Data--\n%'||text_error;
+    END; 
+    
     RETURN;
 END;
 $$

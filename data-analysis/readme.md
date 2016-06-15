@@ -89,6 +89,14 @@ I mapped the points as Bubbles using the wizard, so the size of the cluster incr
 
 You can combine the two layers in a map. I put the points on top.
 
+## Anonymizing Disaggregate Data
+
+Since we're collecting email addresses (optional), first names, and zipcodes, we decided to keep the raw input table private. This means some processing has to happen in order to make that data public. The follow code keeps the fields to be made public, and obfuscates users' names by hashing them with the zipcode.
+
+```sql
+SELECT cartodb_id, md5(upper(name)||zipcode||'bikeways') as user_id, notes, the_geom, the_geom_webmercator, zipcode, insert_time FROM bikeways 
+```
+
 ## Automating Processing 
 
 Right now the processing must be run manually by copy-pasting the functions above into CartoDB's sql pane. Wouldn't it be nicer if it just... happened? This section will explain how to combine all the aggregation functions into one function which can, like the insert function, be pinged remotely using the CartoDB API. You might need to familiarize yourself with your operating system's command line for this section. 
@@ -98,19 +106,19 @@ Right now the processing must be run manually by copy-pasting the functions abov
 [`data-analysis/process-data-call.py`](process-data-call.py) contains a very short Python script that calls the above URL. This could be run on a server with a cron job or set up as a scheduled task in Heroku. Don't forget to change the username variable to your own username. 
 
 ### Heroku set up
-1. Get a Heroku account and provide your credit card details (don't worry, this should all be free).
+1. Get a Heroku account and provide your credit card details (don't worry, this should all be free), create your app.
 
 2. Install the [Heroku Toolbelt](https://toolbelt.heroku.com/)
 
-3. Copy [`data-analysis/process-data-call.py`](process-data-call.py) to a new folder
+3. Copy [`data-analysis/process-data-call.py`](process-data-call.py) to a new folder. **Don't forget to change your username ;)**
 
-4. Create a Heroku app in that folder with the command `heroku create --buildpack heroku/python`
+4. Login to heroku `heroku login` and then initialize the git repositroy with `git init` and add the heroku remote with `heroku git:remote -a process-data`
 
 5. Add a `requirements.txt` file to the folder with the contents `requests==2.9.1`. This tells the Python package manager to include the `requests` library, which handles the HTTP requests
 
 6. Add the file `Procfile` to the folder with the contents `web: python process-data-call.py`. [This tells Heroku](https://devcenter.heroku.com/articles/getting-started-with-python#define-a-procfile) what command to run at the root folder of your "application" when it runs it. 
 
-7. Add all the files in your folder with `git add .` and then push them to heroku with `git push heroku master`
+7. Add all the files in your folder with `git add .`, commit them with `git commit -m "Initial commit` and then push them to heroku with `git push heroku master`
 
 8. On the dashboard for your app, add the `Heroku scheduler` app and then create a new task with task `python process-data-call.py`. I set the schedule to be every day.
 
