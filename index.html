@@ -3,25 +3,27 @@
 <html>
   <head>
     <meta charset=utf-8 name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<!-- http://stackoverflow.com/a/3449338/4047679 -->
+	  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Bikeways for Everybody!</title>
 <!--      Mapbox-->
-    <script src="https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.js"></script>
-    <link rel="stylesheet" href="https://api.mapbox.com/mapbox.js/v2.2.4/mapbox.css"  />
+    <script src="js/leaflet.js"></script>
+    <link rel="stylesheet" href="css/leaflet.css"  />
 <!--      /Mapbox-->
 <!--      Leaflet.draw-->
-    <link rel="stylesheet" type="text/css" href="css/leaflet.draw.css" />
-    <script src="https://leaflet.github.io/Leaflet.draw/leaflet.draw.js"></script>
+      <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.0/leaflet.draw.css"/>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.0/leaflet.draw.js"></script>
 <!--       /Leaflet.draw-->
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script> 
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script> 
       
     <link rel="stylesheet" type="text/css" href="css/style.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 
 <!--      Geolocate Button-->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/leaflet.locatecontrol/0.52.0/L.Control.Locate.mapbox.min.css">
-    <script src="https://cdn.jsdelivr.net/leaflet.locatecontrol/0.52.0/L.Control.Locate.min.js"></script>
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/leaflet.locatecontrol/0.52.0/L.Control.Locate.mapbox.min.css">
+    <script src="//cdn.jsdelivr.net/leaflet.locatecontrol/0.52.0/L.Control.Locate.min.js"></script>
 <!--      /Geolocate Button-->
 	  
 <!--      QGIS Webmap-->
@@ -50,7 +52,6 @@
 			<li><label for="email">Please Enter Your Email (optional)</label></li>
             <li><input type="email" name="email" id="email" title="Please enter a valid email so we can get in touch with you (optional)" placeholder="yourname@example.com" class="text ui-widget-content ui-corner-all"></li>
           </ul>
-          <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
         </fieldset>
       </form>
     </div>
@@ -60,30 +61,59 @@
         <fieldset style="border: none;">
           <ul style="list-style-type: none; padding-left: 0px">
             <li><label for="description">About this</label></li>
-            <li><input type="text" name="description" id="description" placeholder="Description for this" class="text ui-widget-content ui-corner-all"></li>
+			  <li><textarea type="text" name="description" id="description" rows="3" placeholder="Description for this" class="text ui-widget-content ui-corner-all"></textarea></li>
           </ul>
           <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
         </fieldset>
       </form>
     </div>
 
+    <!-- Interaction buttons template (top left) -->
+    <script id="hidden-interaction-buttons-template" type="text/x-custom-template">
+
+    	<span style="font-size:x-large"><div id="add-route" class="circle type1 icon-hover tooltip" title="Draw routes on the map where you want improved infrastructure">
+    		<i class="fa fa-pencil fa-3x fa-inverse" style="margin-top: 10px;"></i>
+    	</div></span>
+    	<div id="add-point" class="circle type1 icon-hover tooltip" title="Add points to the map where you want improved infrastructure">
+    		<i class="fa fa-map-marker fa-inverse fa-3x" style="margin-top: 5px;"></i>
+    	</div><br>
+    	&emsp;<div id="about" class="circle type1 icon-hover tooltip" title="Learn more">
+    		<i class="fa fa-info fa-3x fa-inverse" style="margin-top: 5px;"></i>
+    	</div>	<br>
+    	&emsp;<div id="cancel" class="circle type1 icon-hover tooltip" title="Cancel drawing" style="inline-block">
+    		<i class="fa fa-times fa-3x fa-inverse" style="margin-top: 5px;"></i>
+    	</div>
+    	<div id="save" class="circle type1 icon-hover tooltip" title="Save Route" style="inline-block">
+    	<i class="fa fa-floppy-o fa-3x fa-inverse" style="margin-top: 5px;"></i></div>
+
+    </script>
+
     <script src="js/definitions.js"></script>
     <script src="js/directions.js"></script>
     <script src="data/json_bikefacilitiesexp.js"></script>
 		<script src="js/userconfig.js"></script>
+
     <script>
         
 
-        L.mapbox.accessToken =                         
-            config.mapboxAccessToken;
+        //L.mapbox.accessToken = config.mapboxAccessToken;
 // Create a map in the div #map
 		var bounds = L.latLngBounds(L.latLng(config.south,config.west), L.latLng(config.north,config.east));
-        var map = L.mapbox.map('map', config.baseMap,{ 
+        var map = L.map('map', { 
             center: config.mapFocus,
             zoom: 13, minZoom : 13, maxzoom: 17, maxBounds : bounds, zoomControl :false });
         map.touchZoom.enable();
         L.control.zoom({position : 'bottomleft'}).addTo(map);
 		    
+        //Positron basemap
+        var CartoDB_PositronNoLabels = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+            subdomains: 'abcd',
+            maxZoom: 19
+        });
+        CartoDB_PositronNoLabels.addTo(map);
+        
+        
             //Empty to store markers after they are submitted
         var submittedData = L.geoJson(false, {
             onEachFeature: function (feature, layer) {
@@ -100,44 +130,29 @@
 		var leftBar = L.control({position: 'topleft'});
 	
 		//Inspiration: http://stackoverflow.com/a/25764322/4047679
+		//More insiration: http://stackoverflow.com/questions/18673860/defining-a-html-template-to-append-using-jquery
+		
+		var hiddenInteractionButtonsTemplate = $('#hidden-interaction-buttons-template').html();
+
 		leftBar.onAdd = function(map){
 			var div =L.DomUtil.create('div', '');
 			div.id = 'leftBar';
-			div.innerHTML = '<span style="font-size:x-large"><div id="add-route" class="circle type1 icon-hover tooltip" title="Draw routes on the map where you want improved infrastructure">'
-				+'<i class="fa fa-pencil fa-3x fa-inverse"></i>'
-				+'</div></span>'
-				+'  <div id="add-point" class="circle type1 icon-hover tooltip" title="Add points to the map where you want improved infrastructure">'
-				+'<i class="fa fa-map-marker fa-inverse fa-3x"></i>'
-				+'</div><br>'
-				+'&emsp;<div id="about" class="circle type1 icon-hover tooltip" title="Learn more">'
-				+'<i class="fa fa-info fa-3x fa-inverse"></i>'
-				+'</div>	<br>'
-				+'&emsp;<div id="cancel" class="circle type1 icon-hover tooltip" title="Cancel drawing" style="inline-block">'
-				+'<i class="fa fa-times fa-3x fa-inverse"></i>'
-				+'</div>'
-				+' <div id="save" class="circle type1 icon-hover tooltip" title="Save Route" style="inline-block">'
-				+'<i class="fa fa-floppy-o fa-3x fa-inverse"></i></div>';
+			div.innerHTML = hiddenInteractionButtonsTemplate;
 			return div;
 		};
 
 		leftBar.addTo(map);
 		
 		
-		//Adding layer of labels
-		//See http://gis.stackexchange.com/a/178633/36886
-		var CartoDB_PositronOnlyLabels = {
-			"tilejson": "2.0.1",
-			"tiles":['http://c.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png'], 
+		//Adding layer of labels	
+		var labelLayer = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png', {
             "attribution": '&copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
             "maxzoom": 17,
-        	"minzoom": 13       
-        };
-        
-		var topPane = map._createPane('leaflet-top-pane', map.getPanes().mapPane);
-		var labelLayer = L.mapbox.tileLayer(CartoDB_PositronOnlyLabels).addTo(map);
-		topPane.appendChild(labelLayer.getContainer());
+        	"minzoom": 13, 
+            "pane":"markerPane"}).addTo(map);
+//		markerPane.appendChild(labelLayer.getContainer());
 		//See for explanation of zindex level http://stackoverflow.com/q/35092858/4047679 
-		labelLayer.setZIndex(5);
+//		labelLayer.setZIndex(5);
 		
 
 		
@@ -286,8 +301,33 @@
 					$("#globalAccept").trigger("click");
 				  }    
 				});
+				
 			}
 		});
+		
+		$("#globalAccept").on("touchstart", function() {
+				var checkedValues = dialogGlobalChecker(username.value, zipcode.value);
+				if (checkedValues.valid){
+					zip = "'"+zipcode.value+"'";
+					enteredUsername = "'"+username.value+"'";
+
+					dialogGlobal.dialog("close");
+					validInput = true;
+					if($(this).data('clicked')=='add-route'){
+						drawingRoute();
+					}
+					else if($(this).data('clicked')=='add-point'){
+						drawingPoints();
+					} 
+				}
+				else{
+					validInput = false;
+					var index;
+					for(index = 0; index < checkedValues.error.length; ++index){
+						alert(checkedValues.error[index]);
+					}
+				}
+			});
 		
         /* dialog that appears after finishing a drawing */
       dialog = $( "#dialog" ).dialog({
@@ -337,7 +377,7 @@
 						$("#dialogSaveInput").trigger("click");
 					  }    
 					});
-			  
+			
           }
     });
         
@@ -545,13 +585,18 @@
         feature_group.addLayer(json_bikefacilitiesJSON);
         
        L.control.layers({},{'<b>Bike Facilities</b><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="img/legend/bikefacilities_Offstreet.png" /> Offstreet<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="img/legend/bikefacilities_Cycletrack.png" /> Cycletrack<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="img/legend/bikefacilities_Buffered.png" /> Buffered<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="img/legend/bikefacilities_Bikelane.png" /> Bikelane<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="img/legend/bikefacilities_Sharrow.png" /> Sharrow<br />': json_bikefacilitiesJSON},{collapsed:false}).addTo(map);
-        L.control.scale({options: {position: 'bottomleft', maxWidth: 100, metric: true, imperial: false, updateWhenIdle: false}}).addTo(map);
         
+		L.control.scale({options: {position: 'bottomleft', maxWidth: 100, metric: true, imperial: false, updateWhenIdle: false}}).addTo(map);
+        $(".leaflet-left .leaflet-control-scale").css({"display": "inline-block","float": "none"});
+		//http://stackoverflow.com/a/37173967/4047679
+		
         stackLayers();
+
+    var deviceIsMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent);
 
 		/*Geolocator, activate only on mobile
 		http://stackoverflow.com/a/26577897/4047679*/
-		if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
+		if (deviceIsMobile) {
 			L.control.locate({
 				position: 'topright',
 				icon: 'fa fa-crosshairs',
@@ -627,6 +672,34 @@
                 submit:tourSubmitFunc
             }
          ];
+        
+		if (deviceIsMobile) {
+          tourStates = [
+              {
+                title:"Click on <span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-pencil fa-inverse fa-stack-1x'></i></span> to Draw a Route",
+                html:"<div class = 'img-container'><img src='img/draw_route.gif'></div><br>Click to add points to form a route. Double click on the final point to end that route, and then write a description.",
+                buttons:{'I already know':0,'Tell me more':1},
+                focus:1,
+                submit:tourSubmitFunc
+            },
+            {
+                title:"Click on <span class='fa-stack fa-lg'><i class='fa fa-circle fa-stack-2x'></i><i class='fa fa-map-marker fa-inverse fa-stack-1x'></i></span> to Place a Marker",
+                html:"<div class = 'img-container'><img src='img/add_marker.gif'></div><br>Tell us about dangerous intersections, potholes, etc. When you click 'Save Input' your marker and description are sent to our database.",
+                buttons:{'Go back':-1,'I\'m done':0,'Tell me more!':1},
+                focus:2,
+                submit:tourSubmitFunc
+            },
+              {
+               title: "More Info",
+               html: config.walkthroughWelcome,
+               buttons:{'Go back':-1,'I\'m ready!':0},
+               focus: 1,
+               submit: tourSubmitFunc
+	       }
+          ]   
+        }
+
+        
         $.prompt(tourStates, {zIndex: 1200});
             
     </script>
