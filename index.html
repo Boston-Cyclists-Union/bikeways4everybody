@@ -106,8 +106,8 @@
         L.control.zoom({position : 'bottomleft'}).addTo(map);
 		    
         //Positron basemap
-        var CartoDB_PositronNoLabels = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+        var CartoDB_PositronNoLabels = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.netlight_nolabels/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="//www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="//cartodb.com/attributions">CartoDB</a>',
             subdomains: 'abcd',
             maxZoom: 19
         });
