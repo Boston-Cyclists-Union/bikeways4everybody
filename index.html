@@ -106,7 +106,7 @@
         L.control.zoom({position : 'bottomleft'}).addTo(map);
 		    
         //Positron basemap
-        var CartoDB_PositronNoLabels = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.netlight_nolabels/{z}/{x}/{y}.png', {
+        var CartoDB_PositronNoLabels = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="//www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="//cartodb.com/attributions">CartoDB</a>',
             subdomains: 'abcd',
             maxZoom: 19
@@ -145,7 +145,7 @@
 		
 		
 		//Adding layer of labels	
-		var labelLayer = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png', {
+		var labelLayer = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_only_labels/{z}/{x}/{y}.png', {
             "attribution": '&copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
             "maxzoom": 17,
         	"minzoom": 13, 
